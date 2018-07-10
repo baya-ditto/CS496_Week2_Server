@@ -105,13 +105,23 @@ def sendImageIds():
 
     image_ids = []
     for result in cursor:
-        image_ids.append(result["_id"])
+        image_ids.append(str(result["_id"]))
 
     clist_lock.acquire()
     openImageIds = list(map(lambda x:x.image_id, canvas_list))
     clist_lock.release()
 
     return jsonify({"images" : image_ids, "openImages" : openImageIds})
+
+@app.route("/gallery/postImage", methods=['POST'])
+def postImage():
+    cursor = mongo.db.gallery
+    image = request.json['base64']
+    if image is None:
+        return make_response("None image", 400)
+
+    image_id = cursor.insert({'base64':image})
+
 @app.route("/gallery/getImages/", methods=['POST'])
 def sendImages():
     req_ids_json = request.get_json(silent=True)
@@ -202,4 +212,4 @@ def login():
 
 
 if (__name__ == '__main__'):
-    app.run(host='0.0.0.0', port = 8000, debug=True)
+    app.run(host='0.0.0.0', port = 8080, debug=True)
