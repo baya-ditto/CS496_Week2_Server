@@ -122,6 +122,17 @@ def postImage():
 
     image_id = cursor.insert({'base64':image})
 
+@app.route("/gallery", methods=['GET'])
+def getImage():
+    cursor = mongo.db.gallery
+    images = cursor.find()
+    result = []
+    for image in images:
+        result.append({"_id":str(image["_id"]), "base64":image["base64"]})
+    if images is None:
+        return make_response("Empty image", 400)
+    return jsonify(result)
+
 @app.route("/gallery/getImages/", methods=['POST'])
 def sendImages():
     req_ids_json = request.get_json(silent=True)
