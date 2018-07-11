@@ -9,6 +9,7 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/myapp_py"
 mongo = pymongo(app)
 accounts_lock = threading.Lock()
 gallery_lock = threading.Lock()
+clist_lock = threading.Lock()
 
 @app.route("/", methods=['GET', 'POST'])
 def hello():
@@ -60,8 +61,11 @@ def sendImages():
 
     if type(req_ids_json) != list:
         return make_response("JSON array of required_image_ids should be given2", 400)
-
-    return jsonify(filterAvailableImageInfos(req_ids_json))
+    a = filterAvailableImageInfos(req_ids_json)
+    result = []
+    for imageInfo in a:
+        result.append({"_id":str(imageInfo["_id"]), "base64":imageInfo["base64"]})
+    return jsonify(result)
 # end refresh function
 
 @app.route("/gallery/postImage", methods=['POST'])
@@ -373,7 +377,7 @@ tlock = threading.Lock()
 
 
 if (__name__ == '__main__'):
-    app.run(host='0.0.0.0', port = 8000, debug=True)
+    app.run(host='0.0.0.0', port = 8080, debug=True)
     
     '''
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
